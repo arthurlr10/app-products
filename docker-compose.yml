@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./php/www:/var/www/html:rw,delegated  # live reload
+    environment:
+      DB_HOST: mysql
+      DB_NAME: app
+      DB_USER: root
+      DB_PASS: root
+    depends_on:
+      - mysql
+    networks: [backend]
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./php/www:/var/www/html:ro,delegated
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on: [php]
+    networks: [backend]
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/gestion_produits.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks: [backend]
+
+volumes:
+  mysql-data:
+
+networks:
+  backend:
