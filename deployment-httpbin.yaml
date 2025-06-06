@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-deployment
+  namespace: httpbin-test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: httpbin
+  template:
+    metadata:
+      labels:
+        app: httpbin
+    spec:
+      containers:
+        - name: httpbin
+          image: kennethreitz/httpbin
+          ports:
+            - containerPort: 80
+          # 1) Injection de la variable MODE depuis le ConfigMap
+          env:
+            - name: MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: httpbin-config
+                  key: MODE
+          # 2) Sonde de liveness
+          livenessProbe:
+            httpGet:
+              path: /status/200
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          # 3) Montage d’un emptyDir sur /tmp
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
