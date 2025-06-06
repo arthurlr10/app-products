@@ -8,10 +8,10 @@ services:
     volumes:
       - ./php/www:/var/www/html:rw,delegated  # live reload
     environment:
-      DB_HOST: mysql
-      DB_NAME: app
-      DB_USER: root
-      DB_PASS: root
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
     depends_on:
       - mysql
     networks: [backend]
@@ -30,7 +30,7 @@ services:
     image: mysql:8.4
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: app
+      MYSQL_DATABASE: gestion_produits
     volumes:
       - mysql-data:/var/lib/mysql
       - ./database/gestion_produits.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
